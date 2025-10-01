@@ -48,7 +48,78 @@ pnpm start
 
 ### 节点转换 API
 
-SubMix 提供了类似 Sub Converter 的节点转换接口，可以直接通过 URL 参数传入单个或多个节点链接，返回 Mihomo 配置文件。
+SubMix 提供了类似 Sub Converter 的节点转换接口，支持 GET 和 POST 两种方式。
+
+#### 方式一：POST 请求（推荐，无需 URL 编码）
+
+**接口地址：** `/api/sub`
+
+**请求方式：** POST
+
+**请求头：** `Content-Type: application/json`
+
+**请求体参数：**
+
+| 参数 | 类型 | 必需 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `urls` | string[] | ✅ | - | 节点链接数组 |
+| `type` | string | ❌ | `full` | 配置类型：`simple`（简化版）或 `full`（完整版） |
+| `mode` | string | ❌ | `whitelist` | 路由模式：`whitelist`（白名单）或 `blacklist`（黑名单） |
+
+**使用示例：**
+
+```bash
+# 使用 curl
+curl -X POST https://your-domain.com/api/sub \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": [
+      "vless://uuid@server:port?type=ws&security=tls#香港节点",
+      "ss://method:password@server:port#美国节点",
+      "trojan://password@server:port?sni=example.com#日本节点"
+    ],
+    "type": "simple",
+    "mode": "whitelist"
+  }'
+```
+
+```javascript
+// JavaScript / Node.js
+const response = await fetch('https://your-domain.com/api/sub', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    urls: [
+      'vless://uuid@server:port?type=ws&security=tls#香港节点',
+      'ss://method:password@server:port#美国节点'
+    ],
+    type: 'full',
+    mode: 'whitelist'
+  })
+});
+
+const yaml = await response.text();
+```
+
+```python
+# Python
+import requests
+
+response = requests.post('https://your-domain.com/api/sub', json={
+    'urls': [
+        'vless://uuid@server:port?type=ws&security=tls#香港节点',
+        'ss://method:password@server:port#美国节点'
+    ],
+    'type': 'full',
+    'mode': 'whitelist'
+})
+
+yaml_content = response.text
+```
+
+#### 方式二：GET 请求（需要 URL 编码）
 
 **接口地址：** `/api/sub`
 
@@ -85,17 +156,62 @@ https://your-domain.com/api/sub?url=vless://xxx&mode=blacklist
 https://your-domain.com/api/sub?url=vless://xxx&url=ss://yyy&type=simple&mode=blacklist
 ```
 
+**⚠️ 重要提示 - URL 编码**
+
+由于节点链接中可能包含中文字符（如节点名称）和特殊字符（如 `#`、`&`、`=`、`|` 等），**必须对节点链接进行 URL 编码**后再传入参数。
+
+```javascript
+// JavaScript 示例
+const nodeLink = 'vless://uuid@server:port?type=ws&security=tls#香港节点';
+const encodedLink = encodeURIComponent(nodeLink);
+const apiUrl = `https://your-domain.com/api/sub?url=${encodedLink}`;
+
+// 多个节点
+const node1 = encodeURIComponent('vless://xxx#香港-01');
+const node2 = encodeURIComponent('ss://yyy#美国-02');
+const apiUrl = `https://your-domain.com/api/sub?url=${node1}&url=${node2}`;
+```
+
+```bash
+# 命令行示例（使用 curl）
+curl "https://your-domain.com/api/sub?url=$(echo 'vless://uuid@server:port#香港节点' | jq -sRr @uri)"
+```
+
+```python
+# Python 示例
+from urllib.parse import quote
+
+node_link = 'vless://uuid@server:port?type=ws&security=tls#香港节点'
+encoded_link = quote(node_link, safe='')
+api_url = f'https://your-domain.com/api/sub?url={encoded_link}'
+```
+
 **在 Mihomo 客户端中使用：**
 
 直接将转换后的 URL 作为订阅链接添加到您的 Mihomo 客户端（如 Clash Verge、Clash Meta 等）：
 
 ```
-https://your-domain.com/api/sub?url=节点链接1&url=节点链接2
+# 注意：节点链接需要进行 URL 编码
+https://your-domain.com/api/sub?url=经过URL编码的节点链接1&url=经过URL编码的节点链接2
 ```
+
+在线 URL 编码工具：https://www.urlencoder.org/
+
+**接口对比：**
+
+| 特性 | POST 请求 | GET 请求 |
+|------|----------|---------|
+| URL 编码 | ❌ 不需要 | ✅ 需要 |
+| 中文支持 | ✅ 原生支持 | ⚠️ 需要编码 |
+| 使用便捷性 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| 浏览器直接访问 | ❌ | ✅ |
+| 订阅链接使用 | ❌ | ✅ |
 
 **特性说明：**
 
 - ✅ 支持传入单个或多个节点链接
+- ✅ **POST 接口无需手动 URL 编码**（推荐）
+- ✅ GET 接口自动处理 URL 编码/解码（支持中文节点名称）
 - ✅ 支持多种代理协议（VLESS、Hysteria、Hysteria2、Shadowsocks、Trojan）
 - ✅ 自动生成完整的规则集配置（基于 Loyalsoldier/clash-rules）
 - ✅ 支持白名单和黑名单两种路由模式
