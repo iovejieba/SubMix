@@ -8,8 +8,8 @@
 ## ✨ 功能特性
 
 - 🔄 **多协议支持**：VLESS、Hysteria、Hysteria2、Shadowsocks、SS2022、Trojan
-- 🎯 **智能解析**：自动解析订阅链接并生成标准 YAML 配置
-- 🌐 **订阅转换 API**：类似 Sub Converter，支持通过 URL 参数直接转换订阅链接
+- 🎯 **智能解析**：自动解析节点链接并生成标准 YAML 配置
+- 🌐 **节点转换 API**：类似 Sub Converter，支持通过 URL 参数直接转换节点链接
 - 🎨 **现代化界面**：基于 shadcn/ui 的美观界面，支持深色模式
 - 📝 **节点管理**：可视化编辑、排序、删除节点
 - 🛡️ **完整规则集**：基于 @Loyalsoldier/clash-rules 的高质量规则
@@ -46,9 +46,9 @@ pnpm start
 4. **生成配置**：系统自动生成完整的 Mihomo YAML 配置
 5. **导出使用**：复制或下载配置文件到您的代理客户端
 
-### 订阅转换 API
+### 节点转换 API
 
-SubMix 提供了类似 Sub Converter 的订阅转换接口，可以直接通过 URL 参数传入订阅链接，返回 Mihomo 配置文件。
+SubMix 提供了类似 Sub Converter 的节点转换接口，可以直接通过 URL 参数传入单个或多个节点链接，返回 Mihomo 配置文件。
 
 **接口地址：** `/api/sub`
 
@@ -58,24 +58,31 @@ SubMix 提供了类似 Sub Converter 的订阅转换接口，可以直接通过 
 
 | 参数 | 类型 | 必需 | 默认值 | 说明 |
 |------|------|------|--------|------|
-| `url` | string | ✅ | - | 订阅链接地址 |
+| `url` | string | ✅ | - | 单个节点链接（可传入多个 url 参数） |
+| `urls` | string | ❌ | - | 多个节点链接，用 `\|` 分隔 |
 | `type` | string | ❌ | `full` | 配置类型：`simple`（简化版）或 `full`（完整版） |
 | `mode` | string | ❌ | `whitelist` | 路由模式：`whitelist`（白名单）或 `blacklist`（黑名单） |
 
 **使用示例：**
 
 ```bash
-# 基础用法 - 使用默认配置（完整版 + 白名单模式）
-https://your-domain.com/api/sub?url=https://example.com/subscription
+# 单个节点
+https://your-domain.com/api/sub?url=vless://uuid@server:port?...
+
+# 多个节点（多个 url 参数）
+https://your-domain.com/api/sub?url=vless://xxx&url=ss://yyy&url=trojan://zzz
+
+# 多个节点（urls 参数，用 | 分隔）
+https://your-domain.com/api/sub?urls=vless://xxx|ss://yyy|trojan://zzz
 
 # 简化版配置
-https://your-domain.com/api/sub?url=https://example.com/subscription&type=simple
+https://your-domain.com/api/sub?url=vless://xxx&type=simple
 
 # 黑名单模式
-https://your-domain.com/api/sub?url=https://example.com/subscription&mode=blacklist
+https://your-domain.com/api/sub?url=vless://xxx&mode=blacklist
 
-# 组合参数
-https://your-domain.com/api/sub?url=https://example.com/subscription&type=simple&mode=blacklist
+# 组合使用
+https://your-domain.com/api/sub?url=vless://xxx&url=ss://yyy&type=simple&mode=blacklist
 ```
 
 **在 Mihomo 客户端中使用：**
@@ -83,12 +90,12 @@ https://your-domain.com/api/sub?url=https://example.com/subscription&type=simple
 直接将转换后的 URL 作为订阅链接添加到您的 Mihomo 客户端（如 Clash Verge、Clash Meta 等）：
 
 ```
-https://your-domain.com/api/sub?url=订阅链接
+https://your-domain.com/api/sub?url=节点链接1&url=节点链接2
 ```
 
 **特性说明：**
 
-- ✅ 支持 base64 编码的订阅内容自动解码
+- ✅ 支持传入单个或多个节点链接
 - ✅ 支持多种代理协议（VLESS、Hysteria、Hysteria2、Shadowsocks、Trojan）
 - ✅ 自动生成完整的规则集配置（基于 Loyalsoldier/clash-rules）
 - ✅ 支持白名单和黑名单两种路由模式
@@ -166,7 +173,7 @@ SubMix/
 │   ├── 📁 api/
 │   │   ├── convert/route.ts          # 配置转换 API
 │   │   ├── proxy-config/route.ts     # 协议配置 API
-│   │   ├── sub/route.ts              # 订阅转换 API (类似 Sub Converter)
+│   │   ├── sub/route.ts              # 节点转换 API (类似 Sub Converter)
 │   │   └── subscription/route.ts     # 订阅配置存储 API
 │   ├── page.tsx                      # 主页面
 │   ├── layout.tsx                    # 根布局
