@@ -75,7 +75,7 @@ export default function Home() {
               variant="outline"
               size="default"
               className="flex items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-colors"
-              onClick={() => window.open('https://github.com/YoungLee-coder/SubMix', '_blank')}
+              onClick={() => window.open('https://github.com/iovejieba/SubMix', '_blank')}
             >
               <Github className="h-5 w-5" />
               <span className="hidden sm:inline">GitHub</span>
