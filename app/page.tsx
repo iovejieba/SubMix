@@ -85,11 +85,12 @@ export default function Home() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Rocket className="h-8 w-8 text-primary" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              SubMix
+              SubMax
             </h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             强大的代理订阅链接转换器，支持逐个添加节点、自由编辑排序，生成专属的 Mihomo 配置
+            精细化规则分流、流媒体、tg 分流等
           </p>
         </div>
 
