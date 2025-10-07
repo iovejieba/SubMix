@@ -147,7 +147,7 @@ export class MihomoConfigGenerator {
       'allow-lan': false,
       mode: 'rule',
       'log-level': 'info',
-      'external-controller': '127.0.0.1:9090',
+      'external-controller': '0.0.0.0:9090',
       'unified-delay': true,
       'tcp-concurrent': true,
       'enable-process': true,
